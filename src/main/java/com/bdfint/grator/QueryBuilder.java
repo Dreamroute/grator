@@ -26,12 +26,19 @@ public final class QueryBuilder {
     private QueryBuilder() {}
 
     private Query query = new Query();
+    private Type type = null;
+
+    // 1.many2one; 2.one2many
+    private enum Type {
+        MANY2ONE, ONE2MANY;
+    }
 
     public static QueryBuilder newInstance() {
         return new QueryBuilder();
     }
 
     public QueryBuilder many2one(Object master, String... foreignKeys) {
+        this.type = Type.MANY2ONE;
         query.setMaster(master);
         List<String> fks = Arrays.asList(foreignKeys);
         query.setForeignKeys(fks);
@@ -39,6 +46,7 @@ public final class QueryBuilder {
     }
 
     public QueryBuilder one2many(Object master, String pk) {
+        this.type = Type.ONE2MANY;
         query.setMaster(master);
         query.setPk(pk);
         return this;
@@ -72,10 +80,19 @@ public final class QueryBuilder {
         return this;
     }
 
-    public <T> T result(Class<T> result) {
-        query.setResultCls(result);
-//        return many2one();
-         return one2many();
+    public <T> T result(Class<T> resultType) {
+        query.setResultCls(resultType);
+        
+        // validata params
+        // invoke validateParams() method
+
+        T result = null;
+        if (this.type == Type.MANY2ONE) {
+            result = many2one();
+        } else if (this.type == Type.ONE2MANY) {
+            result = one2many();
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -120,7 +137,7 @@ public final class QueryBuilder {
         List<CollectionWapper> cwList = query.getCollections();
         Map<String, Object> masterMap = (Map<String, Object>) JSON.toJSON(master);
         if (cwList != null && !cwList.isEmpty()) {
-            for (int i = 0; i<cwList.size(); i++) {
+            for (int i = 0; i < cwList.size(); i++) {
                 List<Object> collectionValue = new ArrayList<>();
                 CollectionWapper cw = cwList.get(i);
                 Collection<?> cs = cw.getCollection();
@@ -169,27 +186,8 @@ public final class QueryBuilder {
         }
     }
 
-    private static void validateParams(Object[] params) {
-        if (params == null || params.length == 0) {
-            throw new GratorException("params must not be null or length of params is 0.");
-        }
-        if (params.length % 2 == 1) {
-            throw new GratorException("length of params must be even.");
-        }
-        if (paramsExistNull()) {
-            throw new GratorException("params item must not be null.");
-        }
-    }
-
-    public static boolean paramsExistNull(Object... params) {
-        boolean existNull = false;
-        for (Object param : params) {
-            if (param == null) {
-                existNull = true;
-                break;
-            }
-        }
-        return existNull;
+    public void validateParams() {
+        // ignore
     }
 
 }
