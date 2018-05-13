@@ -10,9 +10,9 @@ import java.util.Collection;
  *
  */
 public class CollectionWapper {
-    Collection<? extends Object> collection;
-    String foreignKey;
-    String collectionProp;
+    private Collection<? extends Object> collection;
+    private String foreignKey;
+    private String collectionProp;
 
     public Collection<? extends Object> getCollection() {
         return collection;
