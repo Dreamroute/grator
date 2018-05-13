@@ -35,7 +35,7 @@ public class GratorTest {
         addr.setId(10L);
         addr.setName("四川成都");
 
-        String odr = QueryBuilder.newInstance().many2one(order, "userId", "addrId").association(user, "id", "user").association(addr, "id", "addr").result(String.class);
+        Order odr = QueryBuilder.newInstance().many2one(order, "userId", "addrId").association(user, "id", "user").association(addr, "id", "addr").result(Order.class);
         System.err.println(odr);
 
     }
