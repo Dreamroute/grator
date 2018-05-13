@@ -35,9 +35,32 @@ public class GratorTest {
         addr.setId(10L);
         addr.setName("四川成都");
 
-        Order odr = QueryBuilder.newInstance().many2one(order, "userId", "addrId").association(user, "id", "user").association(addr, "id", "addr").result(Order.class);
+        String odr = QueryBuilder.newInstance().many2one(order, "userId", "addrId").association(user, "id", "user").association(addr, "id", "addr").result(String.class);
         System.err.println(odr);
 
+    }
+    
+    @Test
+    public void many2oneCollectionTest() {
+        List<Order> orders = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Order order = new Order();
+            order.setId(Long.valueOf(i));
+            order.setPrice(new BigDecimal(String.valueOf(i + 1.2)));
+            order.setUserId(Long.valueOf(i));
+            orders.add(order);
+        }
+        
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            User user = new User();
+            user.setId(Long.valueOf(i));
+            user.setName("w.dehai" + i);
+            users.add(user);
+        }
+        
+        List<?> orderList = QueryBuilder.newInstance().many2one(orders, "userId").association(users, "id", "user").result(List.class);
+        System.err.println(orderList);
     }
 
     /**

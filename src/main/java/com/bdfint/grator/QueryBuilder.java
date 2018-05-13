@@ -1,6 +1,7 @@
 package com.bdfint.grator;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ReflectPermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,9 +83,9 @@ public final class QueryBuilder {
 
     public <T> T result(Class<T> resultType) {
         query.setResultCls(resultType);
-        
+
         // validata params
-        // invoke validateParams() method
+        validateParams();
 
         T result = null;
         if (this.type == Type.MANY2ONE) {
@@ -102,30 +103,71 @@ public final class QueryBuilder {
 
         List<Association> associations = query.getAssociations();
         if (associations != null && !associations.isEmpty()) {
-            Map<String, Object> masterMap = (Map<String, Object>) JSON.toJSON(query.getMaster());
-            for (int i = 0; i < associations.size(); i++) {
-                Association association = associations.get(i);
-                Class<?> associationCls = association.getAssociation().getClass();
-                String pk = association.getPrimaryKey();
-                try {
-                    Field pkField = getFieldByName(masterCls, fks.get(i));
-                    Object pkValue = getFieldValue(pkField, query.getMaster());
-                    Field associationKeyField = getFieldByName(associationCls, pk);
-                    Object associationKeyValue = getFieldValue(associationKeyField, association.getAssociation());
-                    if (Objects.equals(pkValue, associationKeyValue)) {
-                        masterMap.put(association.getAssociationProp(), JSON.toJSON(association.getAssociation()));
-                    }
-                } catch (SecurityException | IllegalArgumentException e) {
-                    throw new GratorException(e);
+            
+            Object result = null;
+            
+            if (isCollection(masterCls)) {
+                result = new ArrayList<Map<String,Object>>();
+                Collection<?> master = (Collection<?>) query.getMaster();
+                for (Object mst : master) {
+                    Map<String, Object> masterMap = (Map<String, Object>) JSON.toJSON(mst);
+                    processResult(mst.getClass(), fks, associations, masterMap, mst);
+                    ((List<Map<String,Object>>) result).add(masterMap);
                 }
-
+            } else {
+                result = (Map<String, Object>) JSON.toJSON(query.getMaster());
+                processResult(masterCls, fks, associations, (Map<String, Object>) result, query.getMaster());
             }
+            
+            
             Class<?> resultType = query.getResultCls();
-            String resultStr = masterMap.toString();
+            String resultStr = JSON.toJSONString(result);
             return (T) (Objects.equals(resultType, String.class) ? resultStr : JSON.parseObject(resultStr, resultType));
         }
 
         throw new GratorException();
+    }
+
+    private void processResult(Class<?> masterCls, List<String> fks, List<Association> associations, Map<String, Object> masterMap, Object master) {
+        for (int i = 0; i < associations.size(); i++) {
+            Association association = associations.get(i);
+            Class<?> associationCls = association.getAssociation().getClass();
+            if (Collection.class.isAssignableFrom(association.getAssociation().getClass())) {
+                Collection<?> o = ((Collection<?>) association.getAssociation());
+                associationCls = o.iterator().next().getClass();
+            }
+            String pk = association.getPrimaryKey();
+            try {
+                Field fkField = getFieldByName(masterCls, fks.get(i));
+                Object fkValue = getFieldValue(fkField, master);
+                Field associationKeyField = getFieldByName(associationCls, pk);
+                
+                Object asstion = association.getAssociation();
+                if (Collection.class.isAssignableFrom(asstion.getClass())) {
+                    Collection<?> ass = (Collection<?>) asstion;
+                    for (Object as : ass) {
+                        Object associationKeyValue = getFieldValue(associationKeyField, as);
+                        if (Objects.equals(fkValue, associationKeyValue)) {
+                            masterMap.put(association.getAssociationProp(), JSON.toJSON(as));
+                            break;
+                        }
+                    }
+                } else {
+                    Object associationKeyValue = getFieldValue(associationKeyField, asstion);
+                    if (Objects.equals(fkValue, associationKeyValue)) {
+                        masterMap.put(association.getAssociationProp(), JSON.toJSON(association.getAssociation()));
+                        break;
+                    }
+                }
+                
+            } catch (SecurityException | IllegalArgumentException e) {
+                throw new GratorException(e);
+            }
+        }
+    }
+
+    private boolean isCollection(Class<?> masterCls) {
+        return Collection.class.isAssignableFrom(masterCls) ? true : false;
     }
 
     @SuppressWarnings("unchecked")
@@ -156,21 +198,24 @@ public final class QueryBuilder {
             }
         }
         Class<?> resultType = query.getResultCls();
-        String resultStr = masterMap.toString();
+        String resultStr = JSON.toJSONString(masterMap);
         return (T) (Objects.equals(resultType, String.class) ? resultStr : JSON.parseObject(resultStr, resultType));
     }
 
     private Object getFieldValue(Field field, Object domain) {
-        boolean accessible = field.isAccessible();
-        field.setAccessible(true);
-        Object value = null;
-        try {
-            value = field.get(domain);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new GratorException(e);
+        if (canAccessPrivateMethodsAndFields()) {
+            boolean accessible = field.isAccessible();
+            field.setAccessible(true);
+            Object value = null;
+            try {
+                value = field.get(domain);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new GratorException(e);
+            }
+            field.setAccessible(accessible);
+            return value;
         }
-        field.setAccessible(accessible);
-        return value;
+        throw new GratorException("can not setAccessible(true), please check your platform access privilege.");
     }
 
     private Field getFieldByName(Class<?> cls, String fieldName) {
@@ -187,7 +232,24 @@ public final class QueryBuilder {
     }
 
     public void validateParams() {
-        // ignore
+        // the type of master must as same as return type/String.
+        Class<?> masterType = query.getMaster().getClass();
+        Class<?> returnType = query.getResultCls();
+        if (!(returnType.equals(masterType) || returnType.equals(String.class) || returnType.isAssignableFrom(masterType))) {
+            throw new GratorException("the type of master must as same as return type[resultCls] or String.class.");
+        }
+    }
+
+    private static boolean canAccessPrivateMethodsAndFields() {
+        try {
+            SecurityManager securityManager = System.getSecurityManager();
+            if (null != securityManager) {
+                securityManager.checkPermission(new ReflectPermission("suppressAccessChecks"));
+            }
+        } catch (SecurityException e) {
+            return false;
+        }
+        return true;
     }
 
 }
