@@ -29,7 +29,7 @@ public class GratorTest {
         User user = new User();
         user.setId(100L);
         user.setName("w.dehai");
-        user.setEmail("wangdehai@bdfint.com");
+        user.setEmail("342252328@qq.com");
 
         Addr addr = new Addr();
         addr.setId(10L);
@@ -76,7 +76,7 @@ public class GratorTest {
         User user = new User();
         user.setId(100L);
         user.setName("w.dehai");
-        user.setEmail("wangdehai@bdfint.com");
+        user.setEmail("342252328@qq.com");
 
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -115,7 +115,7 @@ public class GratorTest {
             User user = new User();
             user.setId(100L + i);
             user.setName("w.dehai");
-            user.setEmail("wangdehai@bdfint.com");
+            user.setEmail("342252328@qq.com");
             users.add(user);
         }
 

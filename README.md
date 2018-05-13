@@ -11,6 +11,7 @@
 * ORM解决的主要关系：一对一，一对多，多对一，多对多；
 * 开发该工具主要致力于花20%的时间解决80%的问题，一对一足够简单（可以理解成为多对一），多对多由于存在中间表，关闭相对复杂，如果通过此工具解决，传入的参数过多，不太优雅，所以该工具
 直接放弃多对多的支持，实际业务场景中多对多相对较少，而且即便是有，往往也伴随着比较复杂的业务逻辑，很少有直接3个表关联查询。
+* 该工具支持单个对象或者集合类型的集成。
 ## 3.使用方法(以实际场景为例)
 * 工具使用类似于建造者模式；
 * 1.创建工具对象：QueryBuilder.newInstance()
@@ -27,3 +28,141 @@
                 .association(addr, "id", "addr")
                 .result(Order.class);
 * 返回值：目前返回值只支持2种，一种是外层对象类型，另外一种是json，需要调用result方法进行传入参数类型，返回json传入参数为String.class
+## 4.举例(单元测试中有这些例子)：
+```
+public class GratorTest {
+
+    /**
+     * 多对一
+     */
+    @Test
+    public void many2oneTest() {
+
+        Order order = new Order();
+        order.setId(1L);
+        order.setPrice(new BigDecimal("1.2"));
+        order.setNum(3);
+        order.setUserId(100L);
+        order.setAddrId(10L);
+
+        User user = new User();
+        user.setId(100L);
+        user.setName("w.dehai");
+        user.setEmail("342252328@qq.com");
+
+        Addr addr = new Addr();
+        addr.setId(10L);
+        addr.setName("四川成都");
+
+        Order odr = QueryBuilder.newInstance()
+                .many2one(order, "userId", "addrId")
+                .association(user, "id", "user")
+                .association(addr, "id", "addr")
+                .result(Order.class);
+        System.err.println(odr);
+
+    }
+    
+    @Test
+    public void many2oneCollectionTest() {
+        List<Order> orders = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Order order = new Order();
+            order.setId(Long.valueOf(i));
+            order.setPrice(new BigDecimal(String.valueOf(i + 1.2)));
+            order.setUserId(Long.valueOf(i));
+            orders.add(order);
+        }
+        
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            User user = new User();
+            user.setId(Long.valueOf(i));
+            user.setName("w.dehai" + i);
+            users.add(user);
+        }
+        
+        List<?> orderList = QueryBuilder.newInstance().many2one(orders, "userId").association(users, "id", "user").result(List.class);
+        System.err.println(orderList);
+    }
+
+    /**
+     * 一对多
+     */
+    @Test
+    public void one2manyTest() {
+
+        User user = new User();
+        user.setId(100L);
+        user.setName("w.dehai");
+        user.setEmail("342252328@qq.com");
+
+        List<Order> orders = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Order order = new Order();
+            order.setId(Long.valueOf(i));
+            order.setNum(3);
+            order.setPrice(new BigDecimal("1.2"));
+            order.setUserId(100L);
+            orders.add(order);
+        }
+
+        List<Addr> addrs = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Addr addr = new Addr();
+            addr.setId(Long.valueOf(i));
+            addr.setName("四川成都" + i);
+            addr.setUserId(100L);
+            addrs.add(addr);
+        }
+
+        User result = QueryBuilder.newInstance().one2many(user, "id").collection(orders, "userId", "orders").collection(addrs, "userId", "addrs").result(User.class);
+        String resultStr = QueryBuilder.newInstance().one2many(user, "id").collection(orders, "userId", "orders").collection(addrs, "userId", "addrs").result(String.class);
+        System.err.println(result);
+        System.err.println(resultStr);
+
+    }
+    
+    /**
+     * 一对多
+     */
+    @Test
+    public void one2manyCollectionTest() {
+
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            User user = new User();
+            user.setId(100L + i);
+            user.setName("w.dehai");
+            user.setEmail("342252328@qq.com");
+            users.add(user);
+        }
+
+        List<Order> orders = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Order order = new Order();
+            order.setId(Long.valueOf(i));
+            order.setNum(3);
+            order.setPrice(new BigDecimal("1.2"));
+            order.setUserId(100L + i);
+            orders.add(order);
+        }
+
+        List<Addr> addrs = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Addr addr = new Addr();
+            addr.setId(Long.valueOf(i));
+            addr.setName("四川成都" + i);
+            addr.setUserId(100L);
+            addrs.add(addr);
+        }
+
+        List<?> result = QueryBuilder.newInstance().one2many(users, "id").collection(orders, "userId", "orders").collection(addrs, "userId", "addrs").result(List.class);
+        String resultStr = QueryBuilder.newInstance().one2many(users, "id").collection(orders, "userId", "orders").collection(addrs, "userId", "addrs").result(String.class);
+        System.err.println(result);
+        System.err.println(resultStr);
+
+    }
+
+}
+```
