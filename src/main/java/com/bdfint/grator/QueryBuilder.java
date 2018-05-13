@@ -174,10 +174,28 @@ public final class QueryBuilder {
     private <T> T one2many() {
         Object master = query.getMaster();
         String pk = query.getPk();
-        Field pkField = getFieldByName(master.getClass(), pk);
-        Object pkValue = getFieldValue(pkField, master);
+        Object result = null;
+        if (Collection.class.isAssignableFrom(master.getClass())) {
+            result = new ArrayList<Map<String, Object>>();
+            for (Object mst : (Collection<?>) master) {
+                Field pkField = getFieldByName(mst.getClass(), pk);
+                Object pkValue = getFieldValue(pkField, mst);
+                Map<String, Object> res = processResult(mst, pkValue);
+                ((ArrayList<Map<String, Object>>) result).add(res);
+            }
+        } else {
+            Field pkField = getFieldByName(master.getClass(), pk);
+            Object pkValue = getFieldValue(pkField, master);
+            result = processResult(master, pkValue);
+        }
+        Class<?> resultType = query.getResultCls();
+        String resultStr = JSON.toJSONString(result);
+        return (T) (Objects.equals(resultType, String.class) ? resultStr : JSON.parseObject(resultStr, resultType));
+    }
+
+    private Map<String, Object> processResult(Object master, Object pkValue) {
+        @SuppressWarnings("unchecked") Map<String, Object> masterMap = (Map<String, Object>) JSON.toJSON(master);
         List<CollectionWapper> cwList = query.getCollections();
-        Map<String, Object> masterMap = (Map<String, Object>) JSON.toJSON(master);
         if (cwList != null && !cwList.isEmpty()) {
             for (int i = 0; i < cwList.size(); i++) {
                 List<Object> collectionValue = new ArrayList<>();
@@ -197,9 +215,7 @@ public final class QueryBuilder {
                 masterMap.put(cw.getCollectionProp(), JSON.toJSON(collectionValue));
             }
         }
-        Class<?> resultType = query.getResultCls();
-        String resultStr = JSON.toJSONString(masterMap);
-        return (T) (Objects.equals(resultType, String.class) ? resultStr : JSON.parseObject(resultStr, resultType));
+        return masterMap;
     }
 
     private Object getFieldValue(Field field, Object domain) {

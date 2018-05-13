@@ -99,5 +99,46 @@ public class GratorTest {
         System.err.println(resultStr);
 
     }
+    
+    /**
+     * 一对多
+     */
+    @Test
+    public void one2manyCollectionTest() {
+
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            User user = new User();
+            user.setId(100L + i);
+            user.setName("w.dehai");
+            user.setEmail("wangdehai@bdfint.com");
+            users.add(user);
+        }
+
+        List<Order> orders = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Order order = new Order();
+            order.setId(Long.valueOf(i));
+            order.setNum(3);
+            order.setPrice(new BigDecimal("1.2"));
+            order.setUserId(100L + i);
+            orders.add(order);
+        }
+
+        List<Addr> addrs = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Addr addr = new Addr();
+            addr.setId(Long.valueOf(i));
+            addr.setName("四川成都" + i);
+            addr.setUserId(100L);
+            addrs.add(addr);
+        }
+
+        List<?> result = QueryBuilder.newInstance().one2many(users, "id").collection(orders, "userId", "orders").collection(addrs, "userId", "addrs").result(List.class);
+        String resultStr = QueryBuilder.newInstance().one2many(users, "id").collection(orders, "userId", "orders").collection(addrs, "userId", "addrs").result(String.class);
+        System.err.println(result);
+        System.err.println(resultStr);
+
+    }
 
 }
