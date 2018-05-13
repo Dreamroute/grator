@@ -28,7 +28,9 @@
                 .association(addr, "id", "addr")
                 .result(Order.class);
 * 返回值：目前返回值只支持2种，一种是外层对象类型，另外一种是json，需要调用result方法进行传入参数类型，返回json传入参数为String.class
-## 4.举例(单元测试中有这些例子)：
+## 4.目前工具存在的问题：
+* 由于工具内部涉及到大量的反射调用，因为工作比较繁忙，所以暂时为增加缓存功能，后续会陆续加上
+## 5.举例(单元测试中有这些例子)：
 package com.bdfint.grator.util;
 
 import java.math.BigDecimal;
@@ -181,3 +183,8 @@ public class GratorTest {
 
 }
 ```
+
+
+## 更新日志：
+* 2018-05-13 内部上线；
+* 2018-05-31 缓存功能上线，对用户透明，兼容以往接口；
