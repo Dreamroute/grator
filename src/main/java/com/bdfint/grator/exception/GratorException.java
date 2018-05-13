@@ -2,7 +2,7 @@ package com.bdfint.grator.exception;
 
 /**
  * 
- * @author wangdehai@bdfint.com
+ * @author 342252328@qq.com
  * @version 1.0
  * @date 2018-05-01
  *
