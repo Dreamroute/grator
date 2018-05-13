@@ -14,7 +14,7 @@ import com.bdfint.grator.util.domain.User;
 public class GratorTest {
 
     /**
-     * 多对一
+     * 多对一：单个对象
      */
     @Test
     public void many2oneTest() {
@@ -44,6 +44,9 @@ public class GratorTest {
 
     }
     
+    /**
+     * 多对一：集合类型
+     */
     @Test
     public void many2oneCollectionTest() {
         List<Order> orders = new ArrayList<>();
@@ -68,7 +71,7 @@ public class GratorTest {
     }
 
     /**
-     * 一对多
+     * 一对多：单个对象
      */
     @Test
     public void one2manyTest() {
@@ -105,7 +108,7 @@ public class GratorTest {
     }
     
     /**
-     * 一对多
+     * 一对多：集合类型
      */
     @Test
     public void one2manyCollectionTest() {

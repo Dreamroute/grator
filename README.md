@@ -29,11 +29,23 @@
                 .result(Order.class);
 * 返回值：目前返回值只支持2种，一种是外层对象类型，另外一种是json，需要调用result方法进行传入参数类型，返回json传入参数为String.class
 ## 4.举例(单元测试中有这些例子)：
-```
+package com.bdfint.grator.util;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import com.bdfint.grator.QueryBuilder;
+import com.bdfint.grator.util.domain.Addr;
+import com.bdfint.grator.util.domain.Order;
+import com.bdfint.grator.util.domain.User;
+
 public class GratorTest {
 
     /**
-     * 多对一
+     * 多对一：单个对象
      */
     @Test
     public void many2oneTest() {
@@ -63,6 +75,9 @@ public class GratorTest {
 
     }
     
+    /**
+     * 多对一：集合类型
+     */
     @Test
     public void many2oneCollectionTest() {
         List<Order> orders = new ArrayList<>();
@@ -87,7 +102,7 @@ public class GratorTest {
     }
 
     /**
-     * 一对多
+     * 一对多：单个对象
      */
     @Test
     public void one2manyTest() {
@@ -124,7 +139,7 @@ public class GratorTest {
     }
     
     /**
-     * 一对多
+     * 一对多：集合类型
      */
     @Test
     public void one2manyCollectionTest() {
