@@ -2,7 +2,7 @@
 ``` javascript
 <dependency>
     <groupId>com.github.dreamroute</groupId>
-    <artifactId>locker</artifactId>
+    <artifactId>grator</artifactId>
     <version>newest version</version>
 </dependency>
 ```
