@@ -1,4 +1,4 @@
-package com.bdfint.grator;
+package com.github.dreamroute.grator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ReflectPermission;
@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.alibaba.fastjson.JSON;
-import com.bdfint.grator.exception.GratorException;
-import com.bdfint.grator.wrapper.Association;
-import com.bdfint.grator.wrapper.CollectionWapper;
+import com.github.dreamroute.grator.exception.GratorException;
+import com.github.dreamroute.grator.wrapper.Association;
+import com.github.dreamroute.grator.wrapper.CollectionWapper;
 
 /**
  * 

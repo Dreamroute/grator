@@ -1,4 +1,4 @@
-package com.bdfint.grator.util;
+package com.github.dreamroute.grator.util;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.bdfint.grator.QueryBuilder;
-import com.bdfint.grator.util.domain.Addr;
-import com.bdfint.grator.util.domain.Order;
-import com.bdfint.grator.util.domain.User;
+import com.github.dreamroute.grator.QueryBuilder;
+import com.github.dreamroute.grator.util.domain.Addr;
+import com.github.dreamroute.grator.util.domain.Order;
+import com.github.dreamroute.grator.util.domain.User;
 
 public class GratorTest {
 

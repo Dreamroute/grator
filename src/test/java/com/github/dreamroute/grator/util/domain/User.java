@@ -1,4 +1,4 @@
-package com.bdfint.grator.util.domain;
+package com.github.dreamroute.grator.util.domain;
 
 import java.util.List;
 import java.util.Set;

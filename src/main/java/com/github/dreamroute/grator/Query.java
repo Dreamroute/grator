@@ -1,10 +1,10 @@
-package com.bdfint.grator;
+package com.github.dreamroute.grator;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.bdfint.grator.wrapper.Association;
-import com.bdfint.grator.wrapper.CollectionWapper;
+import com.github.dreamroute.grator.wrapper.Association;
+import com.github.dreamroute.grator.wrapper.CollectionWapper;
 
 /**
  * 
