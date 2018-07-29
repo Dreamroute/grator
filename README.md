@@ -1,5 +1,5 @@
 ## 0.Get Start...
-``` javascript
+```
 <dependency>
     <groupId>com.github.dreamroute</groupId>
     <artifactId>grator</artifactId>
